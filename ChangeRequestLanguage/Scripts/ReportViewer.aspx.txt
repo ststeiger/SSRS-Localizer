@@ -1,0 +1,345 @@
+<%@ Register TagPrefix="RS" Namespace="Microsoft.ReportingServices.WebServer" Assembly="ReportingServicesWebServer" %>
+<%@ Page Language="C#" AutoEventWireup="true" Inherits="Microsoft.ReportingServices.WebServer.ReportViewerPage" EnableEventValidation="false" %>
+<asp:literal runat="server" id="docType"></asp:literal>
+<html>
+<!-- Here InitializeCulture -->
+ <head id="headID" runat="server">
+  <asp:literal runat="server" id="httpEquiv"></asp:literal>
+  <title><%= GetPageTitle() %></title>
+
+    <style type="text/css" media="all">
+
+html 
+{
+    scrollbar-arrow-color: #FFA500;
+    scrollbar-base-color: black;
+    scrollbar-dark-shadow-color: #aaaaaa;
+    scrollbar-track-color: black;
+    scrollbar-face-color: #3d3d3d;
+    scrollbar-shadow-color: gray;
+    scrollbar-highlight-color: silver;
+    scrollbar-3d-light-color: black;
+}
+
+::-webkit-scrollbar{width: 13px; height: 13px}
+::-webkit-scrollbar:hover{height: 18px}
+ 
+::-webkit-scrollbar-button:start:decrement,
+::-webkit-scrollbar-button:end:increment
+{
+    height: 15px;
+    width: 13px;
+    display: block;
+    background: #101211;
+    background-repeat: no-repeat;
+}
+ 
+::-webkit-scrollbar-button:horizontal:decrement
+{
+    #background-image: url(Scrolling/black/horizontal-decrement-arrow.png);
+    background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAcAAAAHCAIAAABLMMCEAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAIhJREFUeNpiFBASZIABXj5WHQPB44deMUH4TEyMviGyU5dYXrnwHshlAWIDU6HsUk15JZ4F025//vQbJKpnJNQ8wYidnRnIuX3jE0Qr88cPDHu3PRMQYldU4X1498uVCx9AohycnF+//Dmy7+Wpo288A2TOnXz7/ftfRmQ3AIG6Nv/Nqx8BAgwAwakucAZmLk0AAAAASUVORK5CYII=');
+    background-position: 4px 3px;
+}
+ 
+::-webkit-scrollbar-button:horizontal:increment
+{
+    #background-image: url(Scrolling/black/horizontal-increment-arrow.png);
+    background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAcAAAAHCAIAAABLMMCEAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAH5JREFUeNpiFBASVNfmv3n1IwMSYALi929/dkw1AcrBRZk5ODm/fvkjJsFR1aYvLcd969pHIJcJInn7xicg6eQhOXetjY6BIAtEVFWDD0g+vPdleu+NKxfeg0R5+Vg9AmSA/I0rH/379x8owigkImRqJXLt0ofPn37DbQMIMAA2Li0My8uNagAAAABJRU5ErkJggg==');
+    background-position: 3px 3px;
+}
+ 
+::-webkit-scrollbar-button:vertical:decrement
+{
+    #background-image: url(Scrolling/black/vertical-decrement-arrow.png);
+    background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAcAAAAHCAIAAABLMMCEAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAHFJREFUeNpiFBASZAADPSOhS+feQdhMEEpEjKN5gpGRuTCKaEqeGicXc2q+OhMTI1RUx0DQyUMSyFBW4/UOkgEyWICSCVkqS2bfvX/ns7wST3C0woFdLxiNLeQ+fvj95tUPiFHcPCxAaxnhbkAGAAEGAAxaGY5HzMiTAAAAAElFTkSuQmCC');
+    background-position: 3px 4px;
+}
+ 
+::-webkit-scrollbar-button:vertical:increment
+{
+    #background-image: url(Scrolling/black/vertical-increment-arrow.png);
+    background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAcAAAAHCAIAAABLMMCEAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAH9JREFUeNpiFBASZMAATJZ2Ytw8LHC+kDC7ogov888fzFMWWXJxs/Dwsto5i4clKK5Z/IDl86ffa5c+yK3QgqgtSjn1799/JiBr67ond299BjL27Xh+5cJ7kLlADJScN+XW929/50y6BdHBzMHJCaSePf527eKH+3c+Q0QBAgwAkHcvV72C85gAAAAASUVORK5CYII=');
+    background-position: 3px 4px;
+}
+ 
+::-webkit-scrollbar-button:horizontal:decrement:active 
+{
+    #background-image: url(Scrolling/black/horizontal-decrement-arrow-active.png); 
+}
+::-webkit-scrollbar-button:horizontal:increment:active 
+{
+    #background-image: url(Scrolling/black/horizontal-increment-arrow-active.png); 
+}
+::-webkit-scrollbar-button:vertical:decrement:active 
+{
+    #background-image: url(Scrolling/black/vertical-decrement-arrow-active.png); 
+}
+::-webkit-scrollbar-button:vertical:increment:active 
+{
+    #background-image: url(Scrolling/black/vertical-increment-arrow-active.png); 
+}
+
+::-webkit-scrollbar-track { -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3); border-radius: 10px; }
+
+::-webkit-scrollbar-track-piece{background-color: #151716;}
+ 
+::-webkit-scrollbar-thumb:vertical
+{
+    height: 50px;
+    background: -webkit-gradient(linear, left top, right top, color-stop(0%, #4d4d4d), color-stop(100%, #333333));
+    border: 1px solid #0d0d0d;
+    border-top: 1px solid #666666;
+    border-left: 1px solid #666666; 
+    border-radius: 10px;
+    -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.5);
+}
+ 
+::-webkit-scrollbar-thumb:horizontal
+{
+    width: 50px;
+    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #4d4d4d), color-stop(100%, #333333));
+    border: 1px solid #1f1f1f;
+    border-top: 1px solid #666666;
+    border-left: 1px solid #666666; 
+    border-radius: 10px;
+    -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.5);
+}
+
+::-webkit-scrollbar-corner{background-color: #3D3D3D;}
+
+
+    </style>
+
+ </head>
+ <body style="margin: 0px; overflow: auto">
+  <form style="width:100%;height:100%" runat="server" ID="ReportViewerForm">
+   <asp:ScriptManager ID="AjaxScriptManager" AsyncPostBackTimeout="0" runat="server" />
+    <table cellspacing="0" cellpadding="0" width="100%" height="100%"><tr height="100%"><td width="100%">
+   <RS:ReportViewerHost ID="ReportViewerControl" runat="server" />
+    </td></tr></table>
+  </form>
+  <script language="javascript" type="text/javascript">
+
+// =============================== COR-Code =================================
+
+// Avoid `console` errors in browsers that lack a console.
+(function () {
+    var method;
+    var noop = function () { };
+    var methods = [
+        'assert', 'clear', 'count', 'debug', 'dir', 'dirxml', 'error',
+        'exception', 'group', 'groupCollapsed', 'groupEnd', 'info', 'log',
+        'markTimeline', 'profile', 'profileEnd', 'table', 'time', 'timeEnd',
+        'timeStamp', 'trace', 'warn'
+    ];
+
+    var length = methods.length;
+    var console = (window.console = window.console || {});
+
+    while (length--) {
+        method = methods[length];
+
+        // Only stub undefined methods.
+        if (!console[method]) {
+            console[method] = noop;
+        }
+    }
+}());
+
+
+// ============================== End-COR-Code ==============================
+
+
+
+Sys.WebForms.PageRequestManager.prototype._destroyTree = function(element) 
+{
+    var allnodes = element.getElementsByTagName('*'), length = allnodes.length;
+    var nodes = new Array(length);
+    for (var k = 0; k < length; k++) 
+    {
+        nodes[k] = allnodes[k];
+    } // Next k 
+
+    for (var j = 0, l = nodes.length; j < l; j++) 
+    {
+        var node = nodes[j];
+        if (node.nodeType === 1) 
+        {
+            if (node.dispose && typeof (node.dispose) === "function") 
+            {
+                node.dispose();
+            }
+            else if (node.control && typeof (node.control.dispose) === "function") 
+            {
+                node.control.dispose();
+            }
+            var behaviors = node._behaviors;
+            if (behaviors) 
+            {
+                behaviors = Array.apply(null, behaviors);
+                for (var k = behaviors.length - 1; k >= 0; k--) 
+                {
+                    behaviors[k].dispose();
+                }
+            } // End if (behaviors) 
+
+        } // End if (node.nodeType === 1) 
+
+    } // Next j 
+};
+
+
+// ============================== COR-Code ==============================
+
+Array.prototype.contains = function (obj) {
+    var i = this.length;
+    while (i--) {
+        if (this[i] === obj) {
+            return true;
+        }
+    }
+    return false;
+}; // End Function contains
+
+
+// Read a page's GET URL variables and return them as an associative array.
+function getUrlVars(urlHref) 
+{
+    var vars = [], hash;
+    var hashes = urlHref.slice(urlHref.indexOf('?') + 1).split('&');
+
+    var i;
+    for (i = 0; i < hashes.length; i++) 
+    {
+        hash = hashes[i].split('=');
+        vars.push(hash[0]);
+        vars[hash[0]] = hash[1];
+    } // Next i
+
+    return vars;
+} // End Function getUrlVars
+
+
+
+
+function initLanguage()
+{
+    var language = null;
+    var StyleSheetSet = null;
+    var BrowserLanguage = <%= System.Web.HttpContext.Current.Request.UserLanguages != null ? "\"" + System.Convert.ToString(System.Web.HttpContext.Current.Request.UserLanguages[0]) + "\"" : "null" %>;
+
+    if(BrowserLanguage == null)
+        BrowserLanguage = window.navigator.userLanguage || window.navigator.language;
+
+    if(BrowserLanguage != null)
+        BrowserLanguage = BrowserLanguage.substr(0,2).toLowerCase();
+            
+
+
+    var dictParameters = getUrlVars(this.location.href);
+            
+    if (dictParameters != null && dictParameters.contains("rc:Stylesheet"))
+        StyleSheetSet = true;
+
+    if (dictParameters != null && dictParameters.contains("in_sprache"))
+        language = dictParameters["in_sprache"];
+
+    if(language == null)
+        language = BrowserLanguage;
+
+    if(language == null)
+        language = "de";
+
+    language = language.toLowerCase();
+
+    return language;
+} // End function initLanguage
+
+
+function TranslateParameterPrompts(iLanguageIndex)
+{
+    var eles = document.getElementsByTagName("table");
+    var strParamTableId = "ParametersGridReportViewerControl";
+    var tblParameters = null;
+    var ParamLabels = null;
+
+
+    for(var j = 0; j < eles.length; ++j)
+    {
+        // console.log(eles[j]);
+
+        if(eles[j] != null && eles[j].id != null)
+        {
+            if(eles[j].id.slice(0, strParamTableId.length) == strParamTableId) // if startswith str
+            {
+                // console.log(eles[j].id);
+                tblParameters = eles[j];
+                break;
+            }
+            // else console.log(eles[j].id);
+        } // End if(eles[j] != null && eles[j].id != null)
+
+    } // Next j
+
+            
+    if(tblParameters != null)
+        ParamLabels = tblParameters.getElementsByTagName("span");
+            
+    // var ParamLabels = document.querySelectorAll("table[id^='ParametersGridReportViewerControl'] span");
+    if(ParamLabels != null)
+    {
+        for(var i = 0; i < ParamLabels.length; ++i)
+        {
+            var strText = ParamLabels[i].innerHTML;
+                    
+            if (strText != null && strText.indexOf('/') != -1 && strText.indexOf('<input') == -1 ) 
+            {
+                strText = strText.split('/');
+                if (iLanguageIndex < strText.length)
+                    strText = strText[iLanguageIndex];
+                else 
+                { 
+                    if(strText.length > 0)
+                        strText = strText[0];
+                }
+
+                ParamLabels[i].innerHTML = strText;
+            } // End if (strText != null && strText.indexOf('/') != -1) 
+
+        } // Next i
+
+    } // End if(ParamLabels != null)
+
+}
+
+     
+function fixReportingServices(container)
+{
+    var language = initLanguage();
+
+    switch (language)
+    {
+        case "fr":
+            iLanguageIndex = 1;
+            break;
+        case "it":
+            iLanguageIndex = 2;
+            break;
+        case "en":
+            iLanguageIndex = 3;
+            break;
+        default: // "DE" 
+            iLanguageIndex = 0;
+    } // End Switch
+
+    TranslateParameterPrompts(iLanguageIndex);
+}
+
+
+// needed when AsyncEnabled=true. 
+Sys.WebForms.PageRequestManager.getInstance().add_pageLoaded(function () { fixReportingServices('rpt-container'); });
+
+  </script>
+
+ </body>
+</html>
