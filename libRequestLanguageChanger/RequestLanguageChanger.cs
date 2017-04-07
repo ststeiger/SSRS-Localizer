@@ -97,6 +97,48 @@ namespace libRequestLanguageChanger
         } // End Sub context_BeginRequest 
 
 
+
+        public class BrowserInfo
+        {
+
+            public System.Web.HttpBrowserCapabilities Browser { get; set; }
+            public string Name { get; set; }
+            public string Version { get; set; }
+            public string Platform { get; set; }
+            public bool IsMobileDevice { get; set; }
+            public string MobileBrand { get; set; }
+            public string MobileModel { get; set; }
+
+
+            public BrowserInfo(System.Web.HttpRequest request)
+            {
+                if (request.Browser != null)
+                {
+                    if (request.UserAgent.Contains("Edge")
+                        && request.Browser.Browser != "Edge")
+                    {
+                        this.Name = "Edge";
+                    }
+                    else
+                    {
+                        this.Name = request.Browser.Browser;
+                        this.Version = request.Browser.MajorVersion.ToString();
+                    }
+                    this.Browser = request.Browser;
+                    this.Platform = request.Browser.Platform;
+                    this.IsMobileDevice = request.Browser.IsMobileDevice;
+                    if (IsMobileDevice)
+                    {
+                        this.Name = request.Browser.Browser;
+                        this.Name = request.Browser.Browser;
+                    }
+                }
+            }
+
+
+        }
+
+
         void context_EndRequest(object sender, System.EventArgs e)
         {
             if (System.Web.HttpContext.Current != null && System.Web.HttpContext.Current.Response != null)
@@ -105,7 +147,6 @@ namespace libRequestLanguageChanger
 
                 try
                 {
-
                     // response.Headers["P3P"] = "CP=\\\"IDC DSP COR ADM DEVi TAIi PSA PSD IVAi IVDi CONi HIS OUR IND CNT\\\"":
                     // response.Headers.Set("P3P", "CP=\\\"IDC DSP COR ADM DEVi TAIi PSA PSD IVAi IVDi CONi HIS OUR IND CNT\\\"");
                     // response.AddHeader("P3P", "CP=\\\"IDC DSP COR ADM DEVi TAIi PSA PSD IVAi IVDi CONi HIS OUR IND CNT\\\"");
@@ -113,7 +154,77 @@ namespace libRequestLanguageChanger
                     
                     // response.AppendHeader("X-Frame-Options", "DENY");
                     // response.AppendHeader("X-Frame-Options", "AllowAll");
-                    response.AppendHeader("X-Frame-Options", "SAMEORIGIN");
+
+                    if (System.Web.HttpContext.Current.Request.UrlReferrer != null)
+                    {
+                        // For Chrome: ONLY AUTHORITY, for rest - protocol + authority
+                        string host = System.Web.HttpContext.Current.Request.UrlReferrer.Scheme + System.Uri.SchemeDelimiter
+                                    + System.Web.HttpContext.Current.Request.UrlReferrer.Authority
+                                    // + System.Web.HttpContext.Current.Request.UrlReferrer.AbsolutePath;
+                        ;
+
+                        string selfAuth = System.Web.HttpContext.Current.Request.Url.Authority;
+                        string refAuth = System.Web.HttpContext.Current.Request.UrlReferrer.Authority;
+
+
+
+                        // SQL.Log(System.Web.HttpContext.Current.Request.RawUrl, System.Web.HttpContext.Current.Request.UrlReferrer.OriginalString, refAuth);
+
+
+                        if (IsHostAllowed(refAuth))
+                        {
+                            BrowserInfo bi = new BrowserInfo(System.Web.HttpContext.Current.Request);
+
+                            // bi.Name = Firefox
+                            // bi.Name = InternetExplorer
+                            // bi.Name = Chrome
+
+                            // Chrome wants without http(s)://
+                            if (System.StringComparer.OrdinalIgnoreCase.Equals(bi.Name, "Chrome"))
+                                response.AppendHeader("X-Frame-Options", "ALLOW-FROM " + refAuth);
+                            else
+                                response.AppendHeader("X-Frame-Options", "ALLOW-FROM " + host);
+                            
+
+                            // unsafe-eval: invalid JSON https://github.com/keen/keen-js/issues/394
+                            // unsafe-inline: styles
+                            // data: url(data:image/png:...)
+
+                            // https://www.owasp.org/index.php/Clickjacking_Defense_Cheat_Sheet
+                            // https://www.ietf.org/rfc/rfc7034.txt
+                            // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Frame-Options
+                            // https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP
+
+                            // https://stackoverflow.com/questions/10205192/x-frame-options-allow-from-multiple-domains
+                            // https://content-security-policy.com/
+                            // http://rehansaeed.com/content-security-policy-for-asp-net-mvc/
+
+                            System.Collections.Generic.List<string> ls = new System.Collections.Generic.List<string>();
+                            ls.Add("default-src");
+                            ls.Add("'self'");
+                            ls.Add("'unsafe-inline'");
+                            ls.Add("'unsafe-eval'");
+                            ls.Add("data:");
+                            ls.Add("*.msecnd.net");
+                            ls.Add("vortex.data.microsoft.com");
+                            ls.Add(selfAuth);
+                            ls.Add(refAuth);
+
+                            string contentSecurityPolicy = string.Join(" ", ls.ToArray());
+
+                            //response.AppendHeader("Content-Security-Policy", "default-src 'self' 'unsafe-inline' 'unsafe-eval' data: *.msecnd.net vortex.data.microsoft.com " + selfAuth + " " + refAuth);
+                            response.AppendHeader("Content-Security-Policy", contentSecurityPolicy);
+                        }
+                        else
+                        {
+                            response.AppendHeader("X-Frame-Options", "SAMEORIGIN");
+                        }
+                        
+                    }
+                    else
+                        response.AppendHeader("X-Frame-Options", "SAMEORIGIN");
+
+                        
                 }
                 catch (System.Exception ex)
                 {
@@ -124,6 +235,27 @@ namespace libRequestLanguageChanger
             } // End if (System.Web.HttpContext.Current != null && System.Web.HttpContext.Current.Response != null)
 
         } // End Using context_EndRequest
+
+
+
+        private static string[] s_allowedHosts = new string[] {"localhost:49533", "vmsursee" };
+
+        public static bool IsHostAllowed(string host)
+        {
+            return Contains(s_allowedHosts, host);
+        } // End Function IsHostAllowed 
+
+
+        public static bool Contains(string[] allowed, string current)
+        {
+            for (int i = 0; i < allowed.Length; ++i)
+            {
+                if (System.StringComparer.OrdinalIgnoreCase.Equals(allowed[i], current))
+                    return true;
+            } // Next i 
+
+            return false;
+        } // End Function Contains 
 
 
     } // End Class RequestLanguageChanger 

@@ -14,7 +14,16 @@
             </h1>
     </form>
 
+    
     <iframe src="ajax/getResource.ashx" frameborder="0" style="width: 500px; height: 500px;"></iframe>
+    <!--    -->
+    <!--
+    <iframe src="http://cordb2016/ReportServer" frameborder="0" style="width: 500px; height: 500px;"></iframe>
+    -->
+
+    <iframe src="http://cordb2016/ReportServer/Pages/ReportViewer.aspx?%2fSursee%2fFM_FlaecheNachEnergiebezug_ML&rs:Command=Render" frameborder="0" style="width: 1500px; height: 1500px;"></iframe>
+
+    
 
 </body>
 </html>
