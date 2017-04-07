@@ -98,6 +98,7 @@ namespace libRequestLanguageChanger
 
 
 
+        // https://stackoverflow.com/questions/31870789/check-whether-browser-is-chrome-or-edge
         public class BrowserInfo
         {
 
@@ -157,12 +158,22 @@ namespace libRequestLanguageChanger
 
                     if (System.Web.HttpContext.Current.Request.UrlReferrer != null)
                     {
-                        // For Chrome: ONLY AUTHORITY, for rest - protocol + authority
+                        // For Chrome: EntirePath, for rest - protocol + authority
                         string host = System.Web.HttpContext.Current.Request.UrlReferrer.Scheme + System.Uri.SchemeDelimiter
                                     + System.Web.HttpContext.Current.Request.UrlReferrer.Authority
-                                    // + System.Web.HttpContext.Current.Request.UrlReferrer.AbsolutePath;
+                            // + System.Web.HttpContext.Current.Request.UrlReferrer.AbsolutePath;
                         ;
 
+
+                        string hostChrome =
+                             System.Web.HttpContext.Current.Request.UrlReferrer.Scheme + System.Uri.SchemeDelimiter + 
+                             System.Web.HttpContext.Current.Request.UrlReferrer.Authority
+                             + System.Web.HttpContext.Current.Request.UrlReferrer.AbsolutePath
+                        ;
+   
+
+
+                        
                         string selfAuth = System.Web.HttpContext.Current.Request.Url.Authority;
                         string refAuth = System.Web.HttpContext.Current.Request.UrlReferrer.Authority;
 
@@ -179,11 +190,10 @@ namespace libRequestLanguageChanger
                             // bi.Name = InternetExplorer
                             // bi.Name = Chrome
 
-                            // Chrome wants without http(s)://
-                            if (System.StringComparer.OrdinalIgnoreCase.Equals(bi.Name, "Chrome"))
-                                response.AppendHeader("X-Frame-Options", "ALLOW-FROM " + refAuth);
-                            else
+                            // Chrome wants entire path... 
+                            if (!System.StringComparer.OrdinalIgnoreCase.Equals(bi.Name, "Chrome"))
                                 response.AppendHeader("X-Frame-Options", "ALLOW-FROM " + host);
+                            // else response.AppendHeader("X-Frame-Options", "ALLOW-FROM " + refAuth);
                             
 
                             // unsafe-eval: invalid JSON https://github.com/keen/keen-js/issues/394
