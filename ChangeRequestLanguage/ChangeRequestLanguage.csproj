@@ -51,6 +51,7 @@
   <ItemGroup>
     <Content Include="Default.aspx" />
     <Content Include="Global.asax" />
+    <Content Include="Scripts\ai.js" />
     <Content Include="Scripts\ReportViewer.aspx.txt" />
     <Content Include="Web.config" />
   </ItemGroup>

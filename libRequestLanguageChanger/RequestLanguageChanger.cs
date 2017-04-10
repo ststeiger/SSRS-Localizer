@@ -131,7 +131,6 @@ namespace libRequestLanguageChanger
                     if (IsMobileDevice)
                     {
                         this.Name = request.Browser.Browser;
-                        this.Name = request.Browser.Browser;
                     }
                 }
             }
@@ -159,10 +158,9 @@ namespace libRequestLanguageChanger
 
                     if (System.Web.HttpContext.Current.Request.UrlReferrer != null)
                     {
-                        // "X-Frame-Options": "ALLOW-FROM " Not recognized in CHrome 
+                        // "X-Frame-Options": "ALLOW-FROM " Not recognized in Chrome 
                         string host = System.Web.HttpContext.Current.Request.UrlReferrer.Scheme + System.Uri.SchemeDelimiter
                                     + System.Web.HttpContext.Current.Request.UrlReferrer.Authority
-                            // + System.Web.HttpContext.Current.Request.UrlReferrer.AbsolutePath;
                         ;
 
                         string selfAuth = System.Web.HttpContext.Current.Request.Url.Authority;
@@ -196,24 +194,26 @@ namespace libRequestLanguageChanger
                             // http://rehansaeed.com/content-security-policy-for-asp-net-mvc/
 
                             // This is for Chrome:
-                            response.AppendHeader("Content-Security-Policy", "default-src 'self' 'unsafe-inline' 'unsafe-eval' data: *.msecnd.net vortex.data.microsoft.com " + selfAuth + " " + refAuth);
+                            // response.AppendHeader("Content-Security-Policy", "default-src 'self' 'unsafe-inline' 'unsafe-eval' data: *.msecnd.net vortex.data.microsoft.com " + selfAuth + " " + refAuth);
 
-                            /*
+                            
                             System.Collections.Generic.List<string> ls = new System.Collections.Generic.List<string>();
                             ls.Add("default-src");
                             ls.Add("'self'");
                             ls.Add("'unsafe-inline'");
                             ls.Add("'unsafe-eval'");
                             ls.Add("data:");
-                            ls.Add("*.msecnd.net");
-                            ls.Add("vortex.data.microsoft.com");
+
+                            // http://az416426.vo.msecnd.net/scripts/a/ai.0.js
+
+                            // ls.Add("*.msecnd.net");
+                            // ls.Add("vortex.data.microsoft.com");
+
                             ls.Add(selfAuth);
                             ls.Add(refAuth);
 
                             string contentSecurityPolicy = string.Join(" ", ls.ToArray());
                             response.AppendHeader("Content-Security-Policy", contentSecurityPolicy);
-                            */
-
                         }
                         else
                         {
@@ -250,6 +250,7 @@ namespace libRequestLanguageChanger
             ,"vmszhm7050"
             ,"vmpost"
         };
+
 
         public static bool IsHostAllowed(string host)
         {
