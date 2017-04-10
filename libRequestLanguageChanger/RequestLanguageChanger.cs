@@ -152,35 +152,23 @@ namespace libRequestLanguageChanger
                     // response.Headers.Set("P3P", "CP=\\\"IDC DSP COR ADM DEVi TAIi PSA PSD IVAi IVDi CONi HIS OUR IND CNT\\\"");
                     // response.AddHeader("P3P", "CP=\\\"IDC DSP COR ADM DEVi TAIi PSA PSD IVAi IVDi CONi HIS OUR IND CNT\\\"");
                     response.AppendHeader("P3P", "CP=\\\"IDC DSP COR ADM DEVi TAIi PSA PSD IVAi IVDi CONi HIS OUR IND CNT\\\"");
-                    
+
                     // response.AppendHeader("X-Frame-Options", "DENY");
+                    // response.AppendHeader("X-Frame-Options", "SAMEORIGIN");
                     // response.AppendHeader("X-Frame-Options", "AllowAll");
 
                     if (System.Web.HttpContext.Current.Request.UrlReferrer != null)
                     {
-                        // For Chrome: EntirePath, for rest - protocol + authority
+                        // "X-Frame-Options": "ALLOW-FROM " Not recognized in CHrome 
                         string host = System.Web.HttpContext.Current.Request.UrlReferrer.Scheme + System.Uri.SchemeDelimiter
                                     + System.Web.HttpContext.Current.Request.UrlReferrer.Authority
                             // + System.Web.HttpContext.Current.Request.UrlReferrer.AbsolutePath;
                         ;
 
-
-                        string hostChrome =
-                             System.Web.HttpContext.Current.Request.UrlReferrer.Scheme + System.Uri.SchemeDelimiter + 
-                             System.Web.HttpContext.Current.Request.UrlReferrer.Authority
-                             + System.Web.HttpContext.Current.Request.UrlReferrer.AbsolutePath
-                        ;
-   
-
-
-                        
                         string selfAuth = System.Web.HttpContext.Current.Request.Url.Authority;
                         string refAuth = System.Web.HttpContext.Current.Request.UrlReferrer.Authority;
 
-
-
                         // SQL.Log(System.Web.HttpContext.Current.Request.RawUrl, System.Web.HttpContext.Current.Request.UrlReferrer.OriginalString, refAuth);
-
 
                         if (IsHostAllowed(refAuth))
                         {
@@ -192,9 +180,7 @@ namespace libRequestLanguageChanger
 
                             // Chrome wants entire path... 
                             if (!System.StringComparer.OrdinalIgnoreCase.Equals(bi.Name, "Chrome"))
-                                response.AppendHeader("X-Frame-Options", "ALLOW-FROM " + host);
-                            // else response.AppendHeader("X-Frame-Options", "ALLOW-FROM " + refAuth);
-                            
+                                response.AppendHeader("X-Frame-Options", "ALLOW-FROM " + host);    
 
                             // unsafe-eval: invalid JSON https://github.com/keen/keen-js/issues/394
                             // unsafe-inline: styles
@@ -209,6 +195,10 @@ namespace libRequestLanguageChanger
                             // https://content-security-policy.com/
                             // http://rehansaeed.com/content-security-policy-for-asp-net-mvc/
 
+                            // This is for Chrome:
+                            response.AppendHeader("Content-Security-Policy", "default-src 'self' 'unsafe-inline' 'unsafe-eval' data: *.msecnd.net vortex.data.microsoft.com " + selfAuth + " " + refAuth);
+
+                            /*
                             System.Collections.Generic.List<string> ls = new System.Collections.Generic.List<string>();
                             ls.Add("default-src");
                             ls.Add("'self'");
@@ -221,9 +211,9 @@ namespace libRequestLanguageChanger
                             ls.Add(refAuth);
 
                             string contentSecurityPolicy = string.Join(" ", ls.ToArray());
-
-                            //response.AppendHeader("Content-Security-Policy", "default-src 'self' 'unsafe-inline' 'unsafe-eval' data: *.msecnd.net vortex.data.microsoft.com " + selfAuth + " " + refAuth);
                             response.AppendHeader("Content-Security-Policy", contentSecurityPolicy);
+                            */
+
                         }
                         else
                         {
@@ -233,8 +223,6 @@ namespace libRequestLanguageChanger
                     }
                     else
                         response.AppendHeader("X-Frame-Options", "SAMEORIGIN");
-
-                        
                 }
                 catch (System.Exception ex)
                 {
@@ -247,8 +235,21 @@ namespace libRequestLanguageChanger
         } // End Using context_EndRequest
 
 
-
-        private static string[] s_allowedHosts = new string[] {"localhost:49533", "vmsursee" };
+        private static string[] s_allowedHosts = new string[] 
+        {
+             "localhost:49533"
+            ,"localhost:52257"
+            ,"vmsursee"
+            ,"vmswisslife"
+            ,"vmsursee"
+            ,"vmsrg"
+            ,"vmsnb"
+            ,"vmsrg"
+            ,"vmraiffeisen"
+            ,"roomplanning"
+            ,"vmszhm7050"
+            ,"vmpost"
+        };
 
         public static bool IsHostAllowed(string host)
         {
