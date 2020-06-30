@@ -139,6 +139,55 @@ namespace libRequestLanguageChanger
         }
 
 
+
+        public static string GetFromRef(System.Web.HttpContext ctx)
+        {
+            string allowUrls = "";
+            /*
+            if (ctx.Request.Url != null)
+            {
+                allowUrls += ctx.Request.Url.Scheme;
+                allowUrls += System.Uri.SchemeDelimiter;
+                allowUrls += ctx.Request.Url.Authority;
+                // if (!allowUrls.EndsWith("/"))
+                // allowUrls += "/";
+            }
+            */
+
+            if (ctx.Request.UrlReferrer != null)
+            {
+                // allowUrls += " ";
+                allowUrls += ctx.Request.UrlReferrer.Scheme;
+                allowUrls += System.Uri.SchemeDelimiter;
+                allowUrls += ctx.Request.UrlReferrer.Authority;
+                // if (!allowUrls.EndsWith("/"))
+                // allowUrls += "/";
+            }
+
+            return allowUrls;
+        }
+
+
+        public static void Log(string text, params object[] args)
+        {
+
+            if (args != null)
+            {
+                text = string.Format(text, args);
+            }
+
+            throw new System.Exception(text);
+
+            string logPath = System.AppDomain.CurrentDomain.BaseDirectory;
+            // logPath = System.IO.Path.Combine(logPath, "..");
+            // logPath = System.IO.Path.Combine(logPath, "LogFiles");
+            // logPath = System.IO.Path.GetFullPath(logPath);
+
+            logPath = System.IO.Path.Combine(logPath, "LogFile.txt");
+            System.IO.File.AppendAllText(logPath, text + System.Environment.NewLine+ System.Environment.NewLine, System.Text.Encoding.UTF8);
+        }
+
+
         void context_EndRequest(object sender, System.EventArgs e)
         {
             if (System.Web.HttpContext.Current != null && System.Web.HttpContext.Current.Response != null)
@@ -156,20 +205,36 @@ namespace libRequestLanguageChanger
                     // response.AppendHeader("X-Frame-Options", "SAMEORIGIN");
                     // response.AppendHeader("X-Frame-Options", "AllowAll");
 
+
+
+                    // Log("Url: " + System.Web.HttpContext.Current.Request.Url.OriginalString);
+
                     if (System.Web.HttpContext.Current.Request.UrlReferrer != null)
                     {
+                        // Log("UrlReferrer: " + System.Web.HttpContext.Current.Request.UrlReferrer.OriginalString);
+
                         // "X-Frame-Options": "ALLOW-FROM " Not recognized in Chrome 
                         string host = System.Web.HttpContext.Current.Request.UrlReferrer.Scheme + System.Uri.SchemeDelimiter
                                     + System.Web.HttpContext.Current.Request.UrlReferrer.Authority
                         ;
+
+                        string origHost = System.Web.HttpContext.Current.Request.Url.Scheme + System.Uri.SchemeDelimiter
+                                    + System.Web.HttpContext.Current.Request.Url.Authority
+                        ;
+
 
                         string selfAuth = System.Web.HttpContext.Current.Request.Url.Authority;
                         string refAuth = System.Web.HttpContext.Current.Request.UrlReferrer.Authority;
 
                         // SQL.Log(System.Web.HttpContext.Current.Request.RawUrl, System.Web.HttpContext.Current.Request.UrlReferrer.OriginalString, refAuth);
 
+                        // Log("selfAuth: " + selfAuth + System.Environment.NewLine + "refAuth: " + refAuth);
+                        
+
                         if (IsHostAllowed(refAuth))
                         {
+                            // Log("IsHostAllowed: true");
+
                             BrowserInfo bi = new BrowserInfo(System.Web.HttpContext.Current.Request);
 
                             // bi.Name = Firefox
@@ -178,7 +243,17 @@ namespace libRequestLanguageChanger
 
                             // Chrome wants entire path... 
                             if (!System.StringComparer.OrdinalIgnoreCase.Equals(bi.Name, "Chrome"))
-                                response.AppendHeader("X-Frame-Options", "ALLOW-FROM " + host);    
+                            {
+                                // response.AppendHeader("X-Frame-Options", "ALLOW-FROM " + host); // response.AppendHeader("X-Frame-Options", "ALLOW-FROM " + origHost);
+                                response.AppendHeader("X-Frame-Options", "ALLOWALL"); // only working way to allow multiple
+                                // response.AppendHeader("X-Frame-Options", "ALLOW-FROM " + "https://cafm-int.intra.stzh.ch/ https://cafm.intra.stzh.ch/ https://cafm.rs.intra.stzh.ch/ https://cafm-int.rs.intra.stzh.ch/");
+                                // string allowFromRef = GetFromRef(System.Web.HttpContext.Current);
+                                // if(!string.IsNullOrEmpty(allowFromRef)) response.AppendHeader("X-Frame-Options", "ALLOW-FROM " + allowFromRef);
+
+                                // https://www.example.fr/ https://example.fr/ http://www.example.fr/ http://example.fr/"
+                                // It gives a "A" when you check the result with https://security
+                            }
+
 
                             // unsafe-eval: invalid JSON https://github.com/keen/keen-js/issues/394
                             // unsafe-inline: styles
@@ -196,7 +271,7 @@ namespace libRequestLanguageChanger
                             // This is for Chrome:
                             // response.AppendHeader("Content-Security-Policy", "default-src 'self' 'unsafe-inline' 'unsafe-eval' data: *.msecnd.net vortex.data.microsoft.com " + selfAuth + " " + refAuth);
 
-                            
+
                             System.Collections.Generic.List<string> ls = new System.Collections.Generic.List<string>();
                             ls.Add("default-src");
                             ls.Add("'self'");
@@ -217,16 +292,25 @@ namespace libRequestLanguageChanger
                         }
                         else
                         {
+                            // Log("IsHostAllowed: false");
                             response.AppendHeader("X-Frame-Options", "SAMEORIGIN");
+                            // response.AppendHeader("X-Frame-Options", "ALLOWALL");
                         }
-                        
+
                     }
                     else
+                    {
+                        // Log("no referrer.");
                         response.AppendHeader("X-Frame-Options", "SAMEORIGIN");
+                        // response.AppendHeader("X-Frame-Options", "ALLOWALL");
+                    }
+
                 }
                 catch (System.Exception ex)
                 {
                     // WTF ? 
+                    // Log(ex.Message);
+                    // Log(ex.StackTrace);
                     System.Console.WriteLine(ex.Message); // Suppress warning
                 }
 
@@ -234,7 +318,7 @@ namespace libRequestLanguageChanger
 
         } // End Using context_EndRequest
 
-
+        
         private static string[] s_allowedHosts = new string[] 
         {
              "localhost:49533"
@@ -252,8 +336,10 @@ namespace libRequestLanguageChanger
         };
 
 
+
         public static bool IsHostAllowed(string host)
         {
+            // return true;
             return Contains(s_allowedHosts, host);
         } // End Function IsHostAllowed 
 
