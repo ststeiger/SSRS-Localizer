@@ -13,6 +13,22 @@ namespace ChangeRequestLanguage
             System.DateTime dt = new System.DateTime(2013,12,31);
 
             this.lblDate.Text = dt.ToString();
+
+
+
+            this.lblDate.Text = dt.ToString();
+
+
+            System.Web.HttpCookie cook = new HttpCookie("foobar", "hello world");
+
+            cook.Domain =  Context.Request.Url.Host;
+
+            cook.HttpOnly = true;
+            cook.Expires = System.DateTime.UtcNow.AddYears(2000);
+            cook.Path = "/";
+
+            Context.Response.Cookies.Set(cook);
+
         }
     }
 }

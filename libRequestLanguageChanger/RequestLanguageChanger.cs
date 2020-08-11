@@ -1,4 +1,6 @@
 ﻿
+using System.Net;
+
 namespace libRequestLanguageChanger
 {
 
@@ -188,11 +190,110 @@ namespace libRequestLanguageChanger
         }
 
 
+
+        public static void ExternalSetAuthCookie(
+          string userName,
+          bool createPersistentCookie,
+          string strCookiePath)
+        {
+            System.Web.Security.FormsAuthentication.Initialize();
+            System.Web.HttpContext current = System.Web.HttpContext.Current;
+            if (!current.Request.IsSecureConnection && System.Web.Security.FormsAuthentication.RequireSSL)
+                throw new System.Web.HttpException("Connection_not_secure_creating_secure_cookie");
+
+            System.Web.HttpCookie authCookie = System.Web.Security.FormsAuthentication.GetAuthCookie(userName, createPersistentCookie, strCookiePath);
+
+            //authCookie.Path = "/; SameSite=Strict";
+            authCookie.Path = "/; SameSite=None";
+            authCookie.Secure = true;
+
+            System.Web.HttpContext.Current.Response.Cookies.Add(authCookie);
+
+            // string cookieText = GetCookieText(authCookie);
+
+            // // System.Web.HttpContext.Current.Response.Headers.Add("Set-Cookie", cookieText); 
+            // System.Web.HttpContext.Current.Response.Headers.Set("Set-Cookie", cookieText); 
+
+        }
+
+
+        private void ModifyCookie(System.Text.StringBuilder stringBuilder, System.Web.HttpCookie httpCookie)
+        {
+            if (stringBuilder.Length != 0)
+                stringBuilder.Append("; ");
+
+            stringBuilder.Append(httpCookie.Name);
+            stringBuilder.Append("=");
+            stringBuilder.Append(httpCookie.Value);
+
+            if (!string.IsNullOrEmpty(httpCookie.Domain))
+            {
+                stringBuilder.Append("; ");
+                stringBuilder.Append("Domain");
+                stringBuilder.Append("=");
+                stringBuilder.Append(httpCookie.Domain);
+            }
+
+            if (!string.IsNullOrEmpty(httpCookie.Path))
+            {
+                stringBuilder.Append("; ");
+                stringBuilder.Append("Path");
+                stringBuilder.Append("=");
+                stringBuilder.Append(httpCookie.Path);
+            }
+
+            //if (httpCookie.SameSite != (SameSiteMode)(-1))
+            if(true)
+            {
+                // stringBuilder.Append($"; SameSite={httpCookie.SameSite}");
+                stringBuilder.Append("; SameSite=None");
+            }
+
+            if (httpCookie.Secure)
+            {
+                stringBuilder.Append("; ");
+                stringBuilder.Append("Secure");
+
+            }
+
+            if (httpCookie.HttpOnly)
+            {
+                stringBuilder.Append("; ");
+                stringBuilder.Append("HttpOnly");
+            }
+        }
+
+
         void context_EndRequest(object sender, System.EventArgs e)
         {
             if (System.Web.HttpContext.Current != null && System.Web.HttpContext.Current.Response != null)
             {
                 System.Web.HttpResponse response = System.Web.HttpContext.Current.Response;
+                
+                // This does not work with IIS-6...
+
+                //try
+                //{
+
+                //    if (response.Cookies.Count > 0)
+                //    {
+                //        System.Text.StringBuilder stringBuilder = new System.Text.StringBuilder();
+
+                //        for (int i = 0; i < response.Cookies.Count; i++)
+                //        {
+                //            ModifyCookie(stringBuilder, response.Cookies[i]);
+                //        }
+
+                //        string cookieText = stringBuilder.ToString();
+                //        response.Headers.Set("Set-Cookie", cookieText);
+                //    } // End if (response.Cookies.Count > 0) 
+
+                //}
+                //catch (System.Exception ex)
+                //{
+                //    System.Console.WriteLine(ex.Message); // Suppress warning
+                //}
+
 
                 try
                 {
@@ -318,23 +419,51 @@ namespace libRequestLanguageChanger
 
         } // End Using context_EndRequest
 
-        
+        /*
         private static string[] s_allowedHosts = new string[] 
         {
              "localhost:49533"
             ,"localhost:52257"
-            ,"vmsursee"
-            ,"vmswisslife"
-            ,"vmsursee"
-            ,"vmsrg"
+            ,"roomplanning"
+            ,"vmpost"
+            ,"vmraiffeisen"
             ,"vmsnb"
             ,"vmsrg"
-            ,"vmraiffeisen"
-            ,"roomplanning"
+            ,"vmsrg"
+            ,"vmsursee"
+            ,"vmsursee"
+            ,"vmswisslife"
             ,"vmszhm7050"
-            ,"vmpost"
         };
+        */
 
+
+        private static string[] s_allowedHosts = new string[23]
+        {
+                "cafm.intra.stzh.ch",
+                "cafm.rs.intra.stzh.ch",
+                "cafm-int.intra.stzh.ch",
+                "cafm-int.rs.intra.stzh.ch",
+                "cafmsuite-postims.ch",
+                "cafmsuitetest-postims.ch",
+                "cor-asp.ch",
+                "cordb2016",
+                "cordb2016sp2",
+                "localhost:49533",
+                "localhost:52257",
+                "roomplanning",
+                "swisscom-flaechen.ch",
+                "vmpost",
+                "vmraiffeisen",
+                "vmsnb",
+                "vmsrg",
+                "vmsrg",
+                "vmsursee",
+                "vmsursee",
+                "vmswisslife",
+                "vmszhm7050",
+                "wincasa-cafm.ch",
+        };
 
 
         public static bool IsHostAllowed(string host)
