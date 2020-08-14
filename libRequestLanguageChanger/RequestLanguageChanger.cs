@@ -443,21 +443,14 @@ namespace libRequestLanguageChanger
         */
 
 
-        private static string[] s_allowedHosts = new string[23]
+        private static string[] s_allowedHosts = new string[]
         {
-                "cafm.intra.stzh.ch",
-                "cafm.rs.intra.stzh.ch",
-                "cafm-int.intra.stzh.ch",
-                "cafm-int.rs.intra.stzh.ch",
-                "cafmsuite-postims.ch",
-                "cafmsuitetest-postims.ch",
                 "cor-asp.ch",
                 "cordb2016",
                 "cordb2016sp2",
                 "localhost:49533",
                 "localhost:52257",
                 "roomplanning",
-                "swisscom-flaechen.ch",
                 "vmpost",
                 "vmraiffeisen",
                 "vmsnb",
@@ -467,12 +460,15 @@ namespace libRequestLanguageChanger
                 "vmsursee",
                 "vmswisslife",
                 "vmszhm7050",
-                "wincasa-cafm.ch",
         };
 
 
         public static bool IsHostAllowed(string host)
         {
+            // Wildcard 
+            if (host.EndsWith(".cor-asp.ch", System.StringComparison.InvariantCultureIgnoreCase))
+                return true;
+
             // return true;
             return Contains(s_allowedHosts, host);
         } // End Function IsHostAllowed 
