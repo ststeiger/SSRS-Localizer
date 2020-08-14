@@ -203,9 +203,14 @@ namespace libRequestLanguageChanger
 
             System.Web.HttpCookie authCookie = System.Web.Security.FormsAuthentication.GetAuthCookie(userName, createPersistentCookie, strCookiePath);
 
-            //authCookie.Path = "/; SameSite=Strict";
-            authCookie.Path = "/; SameSite=None";
-            authCookie.Secure = true;
+            // intranet urls most of the times should not contain a dot 
+            // so this means if(not intranet)
+            if (current.Request.Url.Host.Contains("."))
+            {
+                //authCookie.Path = "/; SameSite=Strict";
+                authCookie.Path = "/; SameSite=None";
+                authCookie.Secure = true;
+            } // End if (current.Request.Url.Host.Contains(".")) 
 
             System.Web.HttpContext.Current.Response.Cookies.Add(authCookie);
 
