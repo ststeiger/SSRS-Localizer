@@ -445,9 +445,6 @@ namespace libRequestLanguageChanger
 
         private static string[] s_allowedHosts = new string[]
         {
-                "cor-asp.ch",
-                "cordb2016",
-                "cordb2016sp2",
                 "localhost:49533",
                 "localhost:52257",
                 "roomplanning",
@@ -466,11 +463,13 @@ namespace libRequestLanguageChanger
         public static bool IsHostAllowed(string host)
         {
             // Wildcard 
-            if (host.EndsWith(".cor-asp.ch", System.StringComparison.InvariantCultureIgnoreCase))
+            if (host.EndsWith(".example.com", System.StringComparison.InvariantCultureIgnoreCase))
                 return true;
 
-            // return true;
-            return Contains(s_allowedHosts, host);
+            if("MYDOMAIN".Equals(System.Environment.UserDomainName,System.StringComparison.InvariantCultureIgnoreCase))
+                return Contains(s_allowedHosts, host);
+
+            return true;
         } // End Function IsHostAllowed 
 
 
